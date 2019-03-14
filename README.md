@@ -24,14 +24,21 @@ In order to prepare the build, the following commands can be used.
 
 At this point, there is an Xcode project `soundplanelib.xcodeproj` ready for coding
 and compiling in `build/`. If you just want to build the example application and run it
-from the comfort of the terminal, these commands can be used
+from the comfort of the terminal, these commands can be used:
 
     $ xcodebuild -project soundplanelib.xcodeproj -target helloSoundplane -configuration Debug
     $ open examples/Debug/helloSoundplane
 
+To install soundplanelib.a and the headers for use in other applications, run the 
+install target from the build directory:
+
+    $  xcodebuild -project soundplanelib.xcodeproj -target install
+
+All of the XCode targets can also be run from the XCode GUI app.
+
 ### Linux
 
-## NOTE: UNTESTED FOR SOUNDPLANELIB
+## NOTE: UNTESTED 
 
 On Linux, the libusb library is used for USB communications. On Ubuntu, the following 
 command should install it:
