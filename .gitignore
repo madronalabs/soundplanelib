@@ -1,0 +1,47 @@
+#OS X temporary files
+*.DS_Store
+*.swp
+*.lock
+*~.nib
+
+#XCode files
+*.xccheckout
+xcuserdata/
+
+#Visual Studio files
+*.VC.opendb
+*.VC.db
+*.[Oo]bj
+*.exe
+*.pdb
+*.user
+*.aps
+*.pch
+*.vspscc
+*.vssscc
+*_i.c
+*_p.c
+*.ncb
+*.suo
+*.tlb
+*.tlh
+*.bak
+*.[Cc]ache
+*.ilk
+*.log
+*.lib
+*.sbr
+*.sdf
+*.opensdf
+ipch/
+obj/
+[Bb]in
+[Dd]ebug*/
+[Rr]elease*/
+Ankh.NoLoad
+
+
+#Directories
+build/
+Output/
+
