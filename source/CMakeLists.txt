@@ -21,6 +21,14 @@ else(SP_USE_LIBUSB)
     )
 endif()
 
+#--------------------------------------------------------------------
+# Add include directories
+#--------------------------------------------------------------------
+
+include_directories("${CMAKE_SOURCE_DIR}/source")
+include_directories("${CMAKE_SOURCE_DIR}/include")
+
+
 
 #--------------------------------------------------------------------
 # create and install library
@@ -48,8 +56,8 @@ install(
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
-install(FILES ../include/libsoundplane.h DESTINATION include/soundplane)
-
+file(GLOB SP_LIB_INCLUDES "${CMAKE_SOURCE_DIR}/include/*.h")
+install(FILES ${SP_LIB_INCLUDES} DESTINATION include/soundplane)
 
 #--------------------------------------------------------------------
 # Link platform libraries
@@ -61,11 +69,4 @@ else()
   target_link_libraries(soundplanelib "-framework Foundation")
   target_link_libraries(soundplanelib "-framework IOKit")
 endif()
-
-#--------------------------------------------------------------------
-# Add include directories
-#--------------------------------------------------------------------
-
-target_include_directories(soundplanelib PUBLIC .)
-target_include_directories(soundplanelib PUBLIC ../include)
 

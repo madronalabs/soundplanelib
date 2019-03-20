@@ -20,6 +20,7 @@
 #include "SoundplaneModelA.h"
 #include "SoundplaneDriver.h"
 
+
 // constants that affect isochronous transfers
 const int kIsochBuffersExp = 3; // MLTEST 3
 const int kNumIsochBuffers = 1 << kIsochBuffersExp;
@@ -40,21 +41,20 @@ class MacSoundplaneDriver : public SoundplaneDriver
 {
 	// isoch completion routine is allowed to set our device state. (TODO YUK)
 	friend void isochComplete(void *refCon, IOReturn result, void *arg0);
-
+	
 public:
 	MacSoundplaneDriver(SoundplaneDriverListener& m);
 	~MacSoundplaneDriver();
-    
-		
-    // SoundplaneDriver
-    void start() override;
+	
+	// SoundplaneDriver
+	void start() override;
 	uint16_t getFirmwareVersion() const override;
 	std::string getSerialNumberString() const override;
 	const unsigned char *getCarriers() const override;
 	void setCarriers(const Carriers& carriers) override;
 	void enableCarriers(unsigned long mask) override;
-    int getSerialNumber() const override;
-
+	int getSerialNumber() const override;
+	
 	std::mutex& getDeviceStateMutex() { return mDeviceStateMutex; }
 	
 	void destroyDevice();
@@ -69,37 +69,37 @@ public:
 		uint16_t frame = 0;
 	};
 	
-    // advance the FramePosition, wrapping to frame and then buffer.
+	// advance the FramePosition, wrapping to frame and then buffer.
 	FramePosition advance(FramePosition a)
-	{		
+	{
 		uint16_t newFrame = a.frame;
 		uint16_t newBuffer = a.buffer;
-
-        if(++newFrame >= kIsochFramesPerTransaction)
-        {
-            newFrame = 0;
-            if(++newBuffer >= kNumIsochBuffers)
-            {
-                newBuffer = 0;
-            }
-        }
-
+		
+		if(++newFrame >= kIsochFramesPerTransaction)
+		{
+			newFrame = 0;
+			if(++newBuffer >= kNumIsochBuffers)
+			{
+				newBuffer = 0;
+			}
+		}
+		
 		return FramePosition (newBuffer, newFrame);
 	}
-
-    bool mUnplugged{true};
-    
+	
+	bool mUnplugged{true};
+	
 protected:
 	
-    inline int getDeviceState() const override
-    {
-        if(mDeviceState == kDeviceHasIsochSync)
-        {
-            if(mUnplugged) return kDeviceUnplugged;
-        }
-        return mDeviceState;
-    }
-    
+	inline int getDeviceState() const override
+	{
+		if(mDeviceState == kDeviceHasIsochSync)
+		{
+			if(mUnplugged) return kDeviceUnplugged;
+		}
+		return mDeviceState;
+	}
+	
 	inline void setDeviceState(int state) { mDeviceState = state; }
 	
 private:
@@ -110,7 +110,7 @@ private:
 		MacSoundplaneDriver			*parent = 0;
 		IOUSBLowLatencyIsocFrame	*isocFrames = nullptr;
 		unsigned char				*payloads = nullptr;
-
+		
 		uint8_t						endpointIndex = 0;
 		uint8_t						bufIndex = 0;
 		
@@ -124,52 +124,52 @@ private:
 	
 	IOReturn scheduleIsoch(int endpointIndex);
 	static void isochComplete(void *refCon, IOReturn result, void *arg0);
-    void resetBusFrameNumbers();
+	void resetBusFrameNumbers();
 	void resetIsochTransactions();
 	void resetIsochIfStalled();
 	
 	void addOffset(int& buffer, int& frame, int offset);
-    uint16_t getTransferBytesReceived(int endpoint, int buffer, int frame);
-    unsigned char getPayloadLastByte(int endpoint, int buffer, int frame);
-    void clearPayloads(K1IsocTransaction* t);
-    void clearAllPayloads();
-
- 
-    bool frameWasReceived(int endpoint, int buffer, int frame);
-    AbsoluteTime getTransferTimeStamp(int endpoint, int buffer, int frame);
+	uint16_t getTransferBytesReceived(int endpoint, int buffer, int frame);
+	unsigned char getPayloadLastByte(int endpoint, int buffer, int frame);
+	void clearPayloads(K1IsocTransaction* t);
+	void clearAllPayloads();
+	
+	
+	bool frameWasReceived(int endpoint, int buffer, int frame);
+	AbsoluteTime getTransferTimeStamp(int endpoint, int buffer, int frame);
 	IOReturn getTransferStatus(int endpoint, int buffer, int frame);
 	uint16_t getSequenceNumber(int endpoint, int buf, int frame);
-    unsigned char* getPayloadPtr(int endpoint, int buf, int frame);
-    
-    FramePosition getPositionOfSequence(int endpoint, uint16_t seq);
- 	
+	unsigned char* getPayloadPtr(int endpoint, int buf, int frame);
+	
+	FramePosition getPositionOfSequence(int endpoint, uint16_t seq);
+	
 	static void deviceAdded(void *refCon, io_iterator_t iterator);
 	static void deviceNotifyGeneral(void *refCon, io_service_t service, natural_t messageType, void *messageArgument);
-
-    uint16_t mostRecentSequenceNum(int endpointIdx);
-    bool endpointDataHasSequence(int endpoint, uint16_t seq);
-    
-    bool sequenceIsComplete(uint16_t seq);
-    int mostRecentCompleteSequence();
 	
-    void printTransactions();
+	uint16_t mostRecentSequenceNum(int endpointIdx);
+	bool endpointDataHasSequence(int endpoint, uint16_t seq);
+	
+	bool sequenceIsComplete(uint16_t seq);
+	int mostRecentCompleteSequence();
+	
+	void printTransactions();
 	void grabThread();
-	void process();	
+	void process();
 	void processThread();
 	
 	static int getStringDescriptor(IOUSBDeviceInterface187 **dev, uint8_t descIndex, char *destBuf, uint16_t maxLen, uint16_t lang);
-    
+	
 	K1IsocTransaction* getTransactionData(int endpoint, int buf) { return mTransactionData + kNumIsochBuffers*endpoint + buf; }
-    
+	
 	uint32_t getTransactionDataChecksum();
 	
-    // we are only counting, so any races are benign
-    std::atomic<int> mTransactionsInFlight{0};
-    
-    int getNextBufferIndex(int endpoint);
-    std::array<int, kSoundplaneANumEndpoints> mNextBufferIndex {};
-    std::array<std::mutex, kSoundplaneANumEndpoints>  mNextBufferIndexMutex;
-
+	// we are only counting, so any races are benign
+	std::atomic<int> mTransactionsInFlight{0};
+	
+	int getNextBufferIndex(int endpoint);
+	std::array<int, kSoundplaneANumEndpoints> mNextBufferIndex {};
+	std::array<std::mutex, kSoundplaneANumEndpoints>  mNextBufferIndexMutex;
+	
 	std::thread					mGrabThread;
 	std::thread					mProcessThread;
 	
@@ -177,7 +177,7 @@ private:
 	io_iterator_t				matchedIter{0};
 	io_object_t					notification{0};
 	
-    IOUSBDeviceInterface187		**dev{nullptr};
+	IOUSBDeviceInterface187		**dev{nullptr};
 	IOUSBInterfaceInterface192	**intf{nullptr};
 	
 	UInt64						mNextBusFrameNumber[kSoundplaneANumEndpoints];
@@ -185,31 +185,32 @@ private:
 	
 	K1IsocTransaction			mTransactionData[kSoundplaneANumEndpoints * kNumIsochBuffers];
 	
-    uint16_t mSequenceNum{0};
-    uint16_t mNextSequenceNum{1};
-    uint16_t mPreviousSeq{0};
-
+	uint16_t mSequenceNum{0};
+	uint16_t mNextSequenceNum{1};
+	uint16_t mPreviousSeq{0};
+	
 	int mDeviceState = kNoDevice;
 	std::mutex mDeviceStateMutex;
 	
 	unsigned char mCurrentCarriers[kSoundplaneNumCarriers];
-
+	
 	SoundplaneDriverListener& mListener;
 	
-    SensorFrame                 mWorkingFrame{};
-    SensorFrame                 mPrevFrame{};
+	SensorFrame                 mWorkingFrame{};
+	SensorFrame                 mPrevFrame{};
 	
 	// stats
-    int mFrameCounter{0};
-    int mWaitCounter{0};
-    int mErrorCounter{0};
-    int mTotalWaitCounter{0};
-    int mTotalErrorCounter{0};
+	int mFrameCounter{0};
+	int mWaitCounter{0};
+	int mErrorCounter{0};
+	int mTotalWaitCounter{0};
+	int mTotalErrorCounter{0};
 	int mGaps{0};
-		
-    int mStartupCtr{0};
-    int mTestCtr{0};
-    char mErrorBuf[kMaxErrorStringSize];
-    
-    bool mTerminating{false};
+	
+	int mStartupCtr{0};
+	int mTestCtr{0};
+	char mErrorBuf[kMaxErrorStringSize];
+	
+	bool mTerminating{false};
 };
+

@@ -5,7 +5,7 @@
 #pragma once
 
 #include <array>
-#include "SensorFrame.h"
+//#include "SensorFrame.h"
 
 // Soundplane data format:
 // The Soundplane Model A sends frames of data over USB using an isochronous interface with two endpoints.
