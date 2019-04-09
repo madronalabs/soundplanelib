@@ -96,7 +96,7 @@ int main(int argc, const char * argv[])
 	auto secondsSinceStart = duration_cast<seconds>(now - start).count();
 	auto prevSecondsSinceStart = secondsSinceStart;
 	
-	std::cout << "Hello, Soundplane!\n";
+	std::cout << "Hello, Soundplane! v1.81 \n";
 	
 	const int kTestDuration = 4;
 	while(now - start < seconds(kTestDuration))

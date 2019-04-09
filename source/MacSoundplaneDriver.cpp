@@ -14,6 +14,7 @@
 
 #include "ThreadUtility.h"
 
+#include "SoundplaneDriver.h"
 #include "MacSoundplaneDriver.h"
 
 #if DEBUG
@@ -812,12 +813,14 @@ void MacSoundplaneDriver::deviceAdded(void *refCon, io_iterator_t iterator)
       continue;
     }
     // have device plugin, need device interface
-    err = (*plugInInterface)->QueryInterface(plugInInterface, CFUUIDGetUUIDBytes(kIOUSBDeviceInterfaceID), (void**)(LPVOID)&dev);
+    err = (*plugInInterface)->QueryInterface(plugInInterface, CFUUIDGetUUIDBytes(kIOUSBDeviceInterfaceID650), (void**)(LPVOID)&dev);
     IODestroyPlugInInterface(plugInInterface);
     plugInInterface = NULL;
     if (err || !dev)
     {
       show_io_err("could not create device interface", err);
+      snprintf(k1->mErrorBuf, kMaxErrorStringSize, "(%d)", err);
+      k1->mListener.onError(kDevNoInterface, k1->mErrorBuf);
       continue;
     }
     assert(!kr);
@@ -829,6 +832,8 @@ void MacSoundplaneDriver::deviceAdded(void *refCon, io_iterator_t iterator)
       if (kIOReturnSuccess != res)
         show_io_err("unable to release device", res);
       dev = NULL;
+      snprintf(k1->mErrorBuf, kMaxErrorStringSize, "(%d)", err);
+      k1->mListener.onError(kDevInsufficientPower, k1->mErrorBuf);
       continue;
     }
     printf("    Available Bus Power: %d mA\n", (int)(2*powerAvailable));
@@ -860,6 +865,8 @@ void MacSoundplaneDriver::deviceAdded(void *refCon, io_iterator_t iterator)
     if (kIOReturnSuccess != err)
     {
       show_io_err("unable to open device:", err);
+      snprintf(k1->mErrorBuf, kMaxErrorStringSize, "(%d)", err);
+      k1->mListener.onError(kDevUnableToOpenDevice, k1->mErrorBuf);
       goto release;
     }
     

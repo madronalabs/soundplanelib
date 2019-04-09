@@ -27,13 +27,17 @@ enum
 //
 enum
 {
-	kDevNoErr = 0,
-	kDevNoNewFrame = 1, // unused
-	kDevDataDiffTooLarge = 2,
-	kDevGapInSequence = 3,
-	kDevReset = 4,
-	kDevPayloadFailed = 5
+  kDevNoErr = 0,
+  kDevNoNewFrame,
+  kDevDataDiffTooLarge,
+  kDevGapInSequence,
+  kDevReset,
+  kDevPayloadFailed,
+  kDevNoInterface,
+  kDevInsufficientPower,
+  kDevUnableToOpenDevice
 };
+
 
 class SoundplaneDriverListener
 {
