@@ -5,6 +5,10 @@
 
 link_libraries(soundplanelib)
 
+if(SP_USE_LIBUSB)
+  link_libraries(pthread ${LIBUSB_LDFLAGS})
+endif()
+
 
 #--------------------------------------------------------------------
 # Add the other examples.

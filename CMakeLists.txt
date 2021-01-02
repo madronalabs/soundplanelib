@@ -29,14 +29,15 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 # choose USB library to use
 #--------------------------------------------------------------------
 
-if(APPLE)
-  set(SP_USE_LIBUSB 0)
-else(APPLE)
-  set(SP_USE_LIBUSB 1)
+option(SP_USE_LIBUSB "use libusb-1.0 based driver" OFF)
+
+if(NOT APPLE)
+  set(SP_USE_LIBUSB ON)
 endif()
 
-message ("apple:" ${APPLE})
-message ("libusb:" ${SP_USE_LIBUSB})
+if(SP_USE_LIBUSB)
+  include(FindPkgConfig)
+endif()
 
 #--------------------------------------------------------------------
 # Compiler flags
@@ -64,5 +65,4 @@ endif()
 #--------------------------------------------------------------------
 
 add_subdirectory(source)
-add_subdirectory(external)
 add_subdirectory(examples)
