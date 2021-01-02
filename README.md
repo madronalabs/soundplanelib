@@ -1,8 +1,8 @@
-# Soundplanelib	
+# Soundplanelib
 
 Low-level support and and example application for the Madrona Labs Soundplane.
 
-Copyright (c) 2019 Madrona Labs LLC. http://www.madronalabs.com
+Copyright (c) 2019-2021 Madrona Labs LLC. http://www.madronalabs.com
 
 Distributed under the MIT license: http://madrona-labs.mit-license.org/
 
@@ -15,7 +15,7 @@ Xcode Command Line Tools can be downloaded and installed from the "Downloads"
 tab in Xcode's settings. An easy way of installing CMake is to do it via
 Homebrew: With Homebrew installed, type `brew install cmake` in a terminal.
 
-In order to prepare the build, the following commands can be used. 
+In order to prepare the build, the following commands can be used.
 
     $ mkdir build
     $ cd build
@@ -29,22 +29,21 @@ from the comfort of the terminal, these commands can be used:
     $ xcodebuild -project soundplanelib.xcodeproj -target helloSoundplane -configuration Debug
     $ open examples/Debug/helloSoundplane
 
-To install soundplanelib.a and the headers for use in other applications, run the 
+To install soundplanelib.a and the headers for use in other applications, run the
 install target from the build directory:
 
     $  xcodebuild -project soundplanelib.xcodeproj -target install
 
 All of the XCode targets can also be run from the XCode GUI app.
 
+
+
 ### Linux
 
+On Linux, the libusb library is used for USB communications. On Ubuntu/Debian
+the following command should install it:
 
-## NOTE: UNTESTED PLEASE HALP
-
-On Linux, the libusb library is used for USB communications. On Ubuntu, the following 
-command should install it:
-
-    $ sudo apt-get install cmake libusb-1.0.0-dev 
+    $ sudo apt-get install cmake libusb-1.0.0-dev
 
 In order to fetch source dependencies and build, the following commands can be
 used (in a terminal)
@@ -65,6 +64,15 @@ application to access the device, add a udev rule that allows it:
 The app can now be run with
 
     $ examples/helloSoundplane
+
+## Packaging
+
+---
+**NOTE**
+
+_This is currently broken_
+
+---
 
 If desired, it is possible to build a Debian package with the command
 

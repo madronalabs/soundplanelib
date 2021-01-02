@@ -6,6 +6,7 @@
 #include "SensorFrame.h"
 #include <iostream>
 #include <cmath>
+#include <cstring>
 
 template <class c>
 c (clamp)(const c& x, const c& min, const c& max)
