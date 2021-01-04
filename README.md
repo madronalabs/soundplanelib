@@ -67,13 +67,9 @@ The app can now be run with
 
 ## Packaging
 
----
-**NOTE**
-
-_This is currently broken_
-
----
-
 If desired, it is possible to build a Debian package with the command
 
-    $ make Soundplane_deb
+    $ make package
+
+The Debian package will install udev rules outline above in addition to header
+and library files.

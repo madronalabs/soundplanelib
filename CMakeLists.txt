@@ -66,3 +66,28 @@ endif()
 
 add_subdirectory(source)
 add_subdirectory(examples)
+
+#--------------------------------------------------------------------
+# Linux package generation
+#--------------------------------------------------------------------
+install(FILES Data/59-soundplane.rules DESTINATION /etc/udev/rules.d)
+
+set(CPACK_PACKAGE_NAME "soundplanelib")
+set(CPACK_PACKAGE_VERSION_MAJOR ${SP_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${SP_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${SP_VERSION_UPDATE})
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Low-level support for the Madrona Labs Soundplane")
+
+set(CPACK_DEBIAN_PACKAGE_RELEASE 1)
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Randy Jones <randy@madronalabs.com>")
+set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://github.com/madronalabs/soundplanelib")
+set(CPACK_DEBIAN_PACKAGE_SECTION "sound")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libusb-1.0-0 (>= 1.0.17)")
+
+set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_CURRENT_SOURCE_DIR}/Data/postinst")
+
+set(CPACK_GENERATOR "DEB")
+
+if(UNIX AND NOT APPLE)
+  include(CPack)
+endif()
