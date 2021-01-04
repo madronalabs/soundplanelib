@@ -17,21 +17,26 @@
 #include "SoundplaneModelA.h"
 #include "Unpacker.h"
 
+const int kSoundplaneABuffersInFlight = 4;
+const int kSoundplaneANumIsochFrames = 20;
+const int kSoundplaneStartupFrames = 50;
+
 class LibusbSoundplaneDriver : public SoundplaneDriver
 {
 public:
-	LibusbSoundplaneDriver(SoundplaneDriverListener* listener);
+	LibusbSoundplaneDriver(SoundplaneDriverListener &listener);
 	~LibusbSoundplaneDriver();
 
-	void init();
+	virtual void start() override;
 
-	virtual MLSoundplaneState getDeviceState() const override;
+	virtual int getDeviceState() const override;
 	virtual uint16_t getFirmwareVersion() const override;
 	virtual std::string getSerialNumberString() const override;
 
 	virtual const unsigned char *getCarriers() const override;
 	virtual void setCarriers(const Carriers& carriers) override;
 	virtual void enableCarriers(unsigned long mask) override;
+	virtual int getSerialNumber() const override;
 
 private:
 	/**
@@ -256,7 +261,7 @@ private:
 	 *
 	 * Returns false if the process thread should quit.
 	 */
-	bool processThreadSetDeviceState(MLSoundplaneState newState);
+	bool processThreadSetDeviceState(int newState);
 	/**
 	 * Returns false if selecting the isochronous failed.
 	 */
@@ -285,7 +290,7 @@ private:
 	 * decides to quit, the outward facing state of the driver is
 	 * kDeviceIsTerminating if mQuitting is true.
 	 */
-	std::atomic<MLSoundplaneState> mState;
+	std::atomic<int> mState;
 	/**
 	 * mQuitting is set to true by the destructor, and is read by the processing
 	 * thread and getDeviceState in order to know if the driver is quitting.
@@ -318,7 +323,7 @@ private:
 	 * Written on object initialization and then never modified. Can be read
 	 * from any thread.
 	 */
-	SoundplaneDriverListener	* const mListener;
+	SoundplaneDriverListener	&mListener;
 
 	std::thread					mProcessThread;
 

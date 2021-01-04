@@ -28,7 +28,7 @@ public:
 		mGlitchCallback(std::move(glitchCallback)),
 		mSuccessCallback(std::move(successCallback)) {}
 
-	void operator()(const SoundplaneOutputFrame& frame)
+	void operator()(const SensorFrame& frame)
 	{
 		if (mStartupCtr > kSoundplaneStartupFrames)
 		{
@@ -60,7 +60,7 @@ public:
 	}
 
 private:
-	SoundplaneOutputFrame mPreviousFrame;
+	SensorFrame mPreviousFrame;
 	int mStartupCtr = 0;
 	GlitchCallback mGlitchCallback;
 	SuccessCallback mSuccessCallback;
@@ -82,29 +82,27 @@ bool libusbTransferStatusIsFatal(libusb_transfer_status error)
 		error == LIBUSB_TRANSFER_OVERFLOW;
 }
 
-}
+} // anonymous namespace
 
-std::unique_ptr<SoundplaneDriver> SoundplaneDriver::create(SoundplaneDriverListener *listener)
+std::unique_ptr<SoundplaneDriver> SoundplaneDriver::create(SoundplaneDriverListener &listener)
 {
-	auto *driver = new LibusbSoundplaneDriver(listener);
-	driver->init();
-	return std::unique_ptr<LibusbSoundplaneDriver>(driver);
+	return std::unique_ptr<LibusbSoundplaneDriver>(
+    	new LibusbSoundplaneDriver(listener));
 }
 
 
-LibusbSoundplaneDriver::LibusbSoundplaneDriver(SoundplaneDriverListener* listener) :
+LibusbSoundplaneDriver::LibusbSoundplaneDriver(SoundplaneDriverListener &listener) :
 	mState(kNoDevice),
 	mQuitting(false),
 	mListener(listener),
 	mSetCarriersRequest(nullptr),
 	mEnableCarriersRequest(nullptr)
 {
-	assert(listener);
 }
 
 LibusbSoundplaneDriver::~LibusbSoundplaneDriver()
 {
-	// This causes getDeviceState to return kDeviceIsTerminating
+	// This causes getDeviceState to return kDeviceClosing
 	mQuitting.store(true, std::memory_order_release);
 	mCondition.notify_one();
 	mProcessThread.join();
@@ -115,7 +113,7 @@ LibusbSoundplaneDriver::~LibusbSoundplaneDriver()
 	libusb_exit(mLibusbContext);
 }
 
-void LibusbSoundplaneDriver::init()
+void LibusbSoundplaneDriver::start()
 {
 	if (libusb_init(&mLibusbContext) < 0) {
 		throw new std::runtime_error("Failed to initialize libusb");
@@ -125,10 +123,10 @@ void LibusbSoundplaneDriver::init()
 	mProcessThread = std::thread(&LibusbSoundplaneDriver::processThread, this);
 }
 
-MLSoundplaneState LibusbSoundplaneDriver::getDeviceState() const
+int LibusbSoundplaneDriver::getDeviceState() const
 {
 	return mQuitting.load(std::memory_order_acquire) ?
-		kDeviceIsTerminating :
+		kDeviceClosing :
 		mState.load(std::memory_order_acquire);
 }
 
@@ -160,6 +158,20 @@ void LibusbSoundplaneDriver::enableCarriers(unsigned long mask)
 {
 	delete mEnableCarriersRequest.exchange(
 		new unsigned long(mask), std::memory_order_release);
+}
+
+// FIXME: verify this is correct
+int LibusbSoundplaneDriver::getSerialNumber() const {
+  const auto state = getDeviceState();
+  if (state == kDeviceConnected || state == kDeviceHasIsochSync) {
+    const auto serialString = getSerialNumberString();
+    try {
+      return stoi(serialString);
+    } catch (...) {
+      return 0;
+    }
+  }
+  return 0;
 }
 
 void LibusbSoundplaneDriver::processThreadControlTransferCallback(struct libusb_transfer *xfr) {
@@ -317,10 +329,9 @@ bool LibusbSoundplaneDriver::processThreadFillTransferInformation(
 	return true;
 }
 
-bool LibusbSoundplaneDriver::processThreadSetDeviceState(MLSoundplaneState newState)
+bool LibusbSoundplaneDriver::processThreadSetDeviceState(int newState)
 {
 	mState.store(newState, std::memory_order_release);
-	mListener->deviceStateChanged(*this, newState);
 	return !mQuitting.load(std::memory_order_acquire);
 }
 
@@ -478,15 +489,13 @@ void LibusbSoundplaneDriver::processThread()
 		Transfers transfers;
 		LibusbClaimedDevice handle;
 		auto anomalyFilter = makeAnomalyFilter(
-			[this](int startupCtr, float df, const SoundplaneOutputFrame& previousFrame, const SoundplaneOutputFrame& frame)
+			[this](int startupCtr, float df, const SensorFrame& previousFrame, const SensorFrame& frame)
 			{
-				mListener->handleDeviceError(kDevDataDiffTooLarge, startupCtr, 0, df, 0.);
-				mListener->handleDeviceDataDump(previousFrame.data(), previousFrame.size());
-				mListener->handleDeviceDataDump(frame.data(), frame.size());
+				mListener.onError(kDevDataDiffTooLarge, "anomaly filter diff too large");
 			},
-			[this](const SoundplaneOutputFrame& frame)
+			[this](const SensorFrame& frame)
 			{
-				mListener->receivedFrame(*this, frame.data(), frame.size());
+				mListener.onFrame(frame);
 			});
 		LibusbUnpacker unpacker(anomalyFilter);
 
@@ -502,11 +511,14 @@ void LibusbSoundplaneDriver::processThread()
 
 		// FIXME: Handle debugger interruptions
 
+		mListener.onStartup();
+
 		/// Run the main event loop
 		while (!processThreadShouldStopTransfers() || mOutstandingTransfers != 0) {
-			if (libusb_handle_events(mLibusbContext) != LIBUSB_SUCCESS)
+			int status = libusb_handle_events(mLibusbContext);
+			if (status != LIBUSB_SUCCESS)
 			{
-				fprintf(stderr, "Libusb error!\n");
+				mListener.onError(status, libusb_strerror((enum libusb_error)status));
 				break;
 			}
 			if (mState.load(std::memory_order_acquire) == kDeviceHasIsochSync &&
@@ -520,5 +532,6 @@ void LibusbSoundplaneDriver::processThread()
 		if (!processThreadSetDeviceState(kNoDevice)) continue;
 	}
 
-	processThreadSetDeviceState(kDeviceIsTerminating);
+	processThreadSetDeviceState(kDeviceClosing);
+	mListener.onClose();
 }

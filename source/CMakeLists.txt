@@ -1,7 +1,5 @@
 
 
-
-
 set(SP_LIB_SOURCES
   SensorFrame.cpp
   ThreadUtility.cpp
@@ -12,13 +10,13 @@ if(SP_USE_LIBUSB)
     ${SP_LIB_SOURCES}
     LibusbSoundplaneDriver.cpp
     LibusbSoundplaneDriver.h
-    )
+  )
 else(SP_USE_LIBUSB)
   set(SP_LIB_SOURCES
     ${SP_LIB_SOURCES}
     MacSoundplaneDriver.cpp
     MacSoundplaneDriver.h
-    )
+  )
 endif()
 
 #--------------------------------------------------------------------
@@ -28,7 +26,10 @@ endif()
 include_directories("${CMAKE_SOURCE_DIR}/source")
 include_directories("${CMAKE_SOURCE_DIR}/include")
 
-
+if(SP_USE_LIBUSB)
+  pkg_check_modules(LIBUSB REQUIRED libusb-1.0)
+  include_directories(${LIBUSB_INCLUDE_DIRS})
+endif()
 
 #--------------------------------------------------------------------
 # create and install library
@@ -64,7 +65,7 @@ install(FILES ${SP_LIB_INCLUDES} DESTINATION include/soundplane)
 #--------------------------------------------------------------------
 
 if(SP_USE_LIBUSB)
-  target_link_libraries(soundplanelib libusb)
+  target_link_libraries(soundplanelib ${LIBUSB_LINK_LIBRARIES})
 else()
   target_link_libraries(soundplanelib "-framework Foundation")
   target_link_libraries(soundplanelib "-framework IOKit")

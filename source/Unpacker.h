@@ -2,12 +2,13 @@
 // Copyright (c) 2013 Madrona Labs LLC. http://www.madronalabs.com
 // Distributed under the MIT license: http://madrona-labs.mit-license.org/
 
-#ifndef __UNPACKER__
-#define __UNPACKER__
+#pragma once
 
 #include <array>
+#include <functional>
 
 #include "SoundplaneModelA.h"
+#include "SensorFrame.h"
 
 /**
  * The Soundplane model A USB protocol exposes two separate endpoints with
@@ -80,14 +81,14 @@ class Unpacker
 	 */
 	void matchedPackets(SoundplaneADataPacket& p0, SoundplaneADataPacket& p1)
 	{
-		std::array<float, kSoundplaneOutputFrameLength> workingFrame;
+		std::array<float, SensorGeometry::elements> workingFrame;
 		rawPayloadsToFrame(p0.packedData, p1.packedData, workingFrame);
 		clearFrameEdges(workingFrame);
 		mGotFrame(workingFrame);
 	}
 
 public:
-	using GotFrameCallback = std::function<void (const SoundplaneOutputFrame& frame)>;
+	using GotFrameCallback = std::function<void (const SensorFrame& frame)>;
 
 	Unpacker(GotFrameCallback gotFrame) :
 		mGotFrame(std::move(gotFrame)) {}
@@ -202,5 +203,3 @@ private:
 	RingBuffer<Transfer, StoredTransfersPerEndpoint> mTransfers[Endpoints];
 	const GotFrameCallback mGotFrame;
 };
-
-#endif // __UNPACKER__

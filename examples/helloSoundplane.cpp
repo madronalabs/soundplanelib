@@ -21,11 +21,12 @@ public SoundplaneDriverListener
 	// called on startup by SoundplaneDriver
 	void onStartup() override
 	{
+		std::cout << "listener: onStartup()\n";
 		std::cout << "calibrating: please don't touch...\n";
 		mStartCalibrateTime = system_clock::now();
 		mCalibrating = true;
 	}
-	
+
 	// this callback is called from the driver's process thread for each frame.
 	// if we return too slowly, the driver may lose its place creating gaps in the sensor data.
 	//
@@ -36,7 +37,7 @@ public SoundplaneDriverListener
 			// gather calibration for first second
 			mCalibrateSamples++;
 			mCalibrateSum = add(mCalibrateSum, frame);
-			
+
 			if(system_clock::now() - mStartCalibrateTime > seconds(1))
 			{
 				// finish calibration
@@ -49,7 +50,7 @@ public SoundplaneDriverListener
 		{
 			// calibrate
 			mCalibratedFrame = calibrate(frame, mCalibrateMean);
-			
+
 			// scale for display
 			mCalibratedFrame = multiply(mCalibratedFrame, 4.f);
 			if(++mFrameCounter > 500)
@@ -59,26 +60,26 @@ public SoundplaneDriverListener
 			}
 		}
 	}
-	
+
 	// called on any errors by SoundplaneDriver (unimplemented)
 	void onError(int err, const char* errStr) override
 	{
-		
+		std::cout << "listener: onError: " << err << " " << errStr << std::endl;
 	}
-	
+
 	// called on close by SoundplaneDriver
 	void onClose(void) override
 	{
-		
+		std::cout << "listener: onClose()\n";
 	}
-	
+
 	time_point<system_clock> mStartCalibrateTime;
-	
+
 	// note default initialization of SensorFrames needed.
 	SensorFrame mCalibrateSum{};
 	SensorFrame mCalibrateMean{};
 	SensorFrame mCalibratedFrame{};
-	
+
 	bool mCalibrating{false};
 	int mFrameCounter{0};
 	int mCalibrateSamples{0};
@@ -87,18 +88,18 @@ public SoundplaneDriverListener
 int main(int argc, const char * argv[])
 {
 	HelloSoundplaneDriverListener listener;
-	
+
 	auto driver = SoundplaneDriver::create(listener);
 	driver->start();
-	
+
 	time_point<system_clock> start, now;
 	start = now = system_clock::now();
 	auto secondsSinceStart = duration_cast<seconds>(now - start).count();
 	auto prevSecondsSinceStart = secondsSinceStart;
-	
+
 	std::cout << "Hello, Soundplane! v1.81 \n";
-	
-	const int kTestDuration = 4;
+
+	const int kTestDuration = 10;
 	while(now - start < seconds(kTestDuration))
 	{
 		now = system_clock::now();
@@ -107,11 +108,11 @@ int main(int argc, const char * argv[])
 		{
 			std::cout << "seconds: " << secondsSinceStart << " \n";
 		}
-		
+
 		prevSecondsSinceStart = secondsSinceStart;
 		std::this_thread::sleep_for(milliseconds(500));
 	}
-	
+
 	std::cout << "goodbye.\n";
 	return 0;
 }

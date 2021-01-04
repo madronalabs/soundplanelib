@@ -5,7 +5,9 @@
 #include "SoundplaneModelA.h"
 #include "SensorFrame.h"
 #include <iostream>
+#include <limits>
 #include <cmath>
+#include <cstring>
 
 template <class c>
 c (clamp)(const c& x, const c& min, const c& max)
@@ -296,7 +298,7 @@ void dumpFrameStats(std::ostream& s, const SensorFrame& f)
 	int w = SensorGeometry::width;
 	int h = SensorGeometry::height;
 	
-	float min = MAXFLOAT;
+	float min = std::numeric_limits<float>::max();
 	float max = -min;
 	float sum = 0.f;
 	for (int j=0; j<h; ++j)
