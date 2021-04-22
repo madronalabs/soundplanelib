@@ -1,6 +1,6 @@
 # Soundplanelib	
 
-Low-level support and and example application for the Madrona Labs Soundplane.
+Low-level support and example application for the Madrona Labs Soundplane.
 
 Copyright (c) 2019 Madrona Labs LLC. http://www.madronalabs.com
 
