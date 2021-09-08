@@ -70,7 +70,9 @@ add_subdirectory(examples)
 #--------------------------------------------------------------------
 # Linux package generation
 #--------------------------------------------------------------------
-install(FILES Data/59-soundplane.rules DESTINATION /etc/udev/rules.d)
+if(UNIX AND NOT APPLE)
+  install(FILES Data/59-soundplane.rules DESTINATION /etc/udev/rules.d)
+endif()
 
 set(CPACK_PACKAGE_NAME "soundplanelib")
 set(CPACK_PACKAGE_VERSION_MAJOR ${SP_VERSION_MAJOR})
