@@ -36,7 +36,8 @@ install target from the build directory:
 
 All of the XCode targets can also be run from the XCode GUI app.
 
-
+Either the Apple IOKit driver or the libusb library can be used. To enable a libusb build, 
+add the option `-DSP_USE_LIBUSB=ON` to the cmake command.
 
 ### Linux
 
@@ -65,6 +66,7 @@ The app can now be run with
 
     $ examples/helloSoundplane
 
+
 ## Packaging
 
 If desired, it is possible to build a Debian package with the command
@@ -73,3 +75,14 @@ If desired, it is possible to build a Debian package with the command
 
 The Debian package will install udev rules outline above in addition to header
 and library files.
+
+## Tested Configurations
+
+Tested on:
+
+| OS | Arch | Driver | Compiler |
+| --- | ----- | ----- | ----------|
+| macOS Mojave (10.14) | x86_64 | IOKit | clang 11.0.0 |
+| macOS Mojave (10.14) | x84_64 | libusb-1.0 (installed via homebrew) | clang 11.0.0 |
+| Debian Buster | x86_64 | libusb-1.0 | gcc 8.3.0 |
+| Raspbian ~Stretch | rpi3+/rpi4 armhf | libusb-1.0 | gcc 6.3.0 | 
