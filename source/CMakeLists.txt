@@ -23,8 +23,8 @@ endif()
 # Add include directories
 #--------------------------------------------------------------------
 
-include_directories("${CMAKE_SOURCE_DIR}/source")
-include_directories("${CMAKE_SOURCE_DIR}/include")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../include")
 
 if(SP_USE_LIBUSB)
   pkg_check_modules(LIBUSB REQUIRED libusb-1.0)
