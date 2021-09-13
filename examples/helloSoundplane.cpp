@@ -99,7 +99,7 @@ int main(int argc, const char * argv[])
 
 	std::cout << "Hello, Soundplane! v1.81 \n";
 
-	const int kTestDuration = 10;
+	const int kTestDuration = 60;
 	while(now - start < seconds(kTestDuration))
 	{
 		now = system_clock::now();

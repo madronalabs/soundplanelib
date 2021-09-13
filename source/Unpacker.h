@@ -69,8 +69,9 @@ class Unpacker
 
 	static bool lessThanHandleOverflow(uint16_t a, uint16_t b)
 	{
-		// This expression is equivalent to a < b, except that it gracefully
-		// handles serial number overflows.
+		// This expression is equivalent to a < b, except that it handles serial
+		// number overflows as long as difference between a and b is less than
+		// 2^15.
 		return static_cast<uint16_t>(b - a) < (1 << (sizeof(a) * 8 - 1));
 	}
 
@@ -125,6 +126,8 @@ public:
 				popPacket(&ts[0]);
 				popPacket(&ts[1]);
 			}
+			else if (p0.seqNum == 0) popPacket(&ts[0]);  // Discard if no sequence number
+			else if (p1.seqNum == 0) popPacket(&ts[1]);
 			else
 			{
 				// The oldest packet we have for one endpoint is older than
