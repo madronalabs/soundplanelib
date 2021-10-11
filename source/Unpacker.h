@@ -121,8 +121,8 @@ public:
 			SoundplaneADataPacket& p1 = ts[1]->currentPacket();
 			if (p0.seqNum == p1.seqNum)
 			{
-				// The sequence numbers line up
-				matchedPackets(p0, p1);
+				// The sequence numbers line up, but discard if both zero/empty
+				if (p0.seqNum != 0) matchedPackets(p0, p1);
 				popPacket(&ts[0]);
 				popPacket(&ts[1]);
 			}
