@@ -165,10 +165,17 @@ void setThreadPriority(pthread_t inThread, uint32_t inPriority, bool inIsFixed)
 {
 	int policy;
 	struct sched_param param;
-	
+
 	pthread_getschedparam(inThread, &policy, &param);
-	param.sched_priority = sched_get_priority_max(policy);
+	// param.sched_priority = sched_get_priority_max(policy);
+	param.sched_priority = inPriority;
 	pthread_setschedparam(inThread, policy, &param);
+}
+
+void SetPriorityRealtimeAudio(pthread_t inThread)
+{
+	// MAINT: implementation is used in SoundplaneModel
+	setThreadPriority(inThread, 95, false /* ignored */);
 }
 
 #endif
