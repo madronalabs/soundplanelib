@@ -32,12 +32,14 @@ from the comfort of the terminal, these commands can be used:
 To install soundplanelib.a and the headers for use in other applications, run the
 install target from the build directory:
 
-    $  xcodebuild -project soundplanelib.xcodeproj -target install
+    $ xcodebuild -project soundplanelib.xcodeproj -target install
 
 All of the XCode targets can also be run from the XCode GUI app.
 
-Either the Apple IOKit driver or the libusb library can be used. To enable a libusb build, 
-add the option `-DSP_USE_LIBUSB=ON` to the cmake command.
+Either the Apple IOKit driver or the libusb library can be used. To enable a libusb build, first install libusb and then add the option `-DSP_USE_LIBUSB=ON` to the cmake command. This can be done using Homebrew:
+
+    $ brew install libusb
+    $ cmake -DSP_USE_LIBUSB=ON -GXcode ..
 
 ### Linux
 
